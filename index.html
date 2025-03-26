@@ -1,11 +1,663 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Title of the document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Load FBX Model with Animation</title>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.174.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.174.0/examples/jsm/"
+      }
+    }
+  </script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #333333;  /* 添加背景色 */
+    }
+    canvas {
+      display: block;
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      width: 300px !important;
+      height: 300px !important;
+      border-radius: 10px;
+      /* box-shadow: 0 0 10px rgba(0,0,0,0.2); */
+    }
+    #info {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: black;
+      font-family: Arial, sans-serif;
+      background: rgba(255,255,255,0.8);
+      padding: 10px;
+      border-radius: 5px;
+    }
+    #dialog {
+      position: absolute;
+      color: white;
+      font-family: Arial, sans-serif;
+      background: rgba(0,0,0,0.7);
+      padding: 15px;
+      border-radius: 10px;
+      max-width: 300px;
+      max-height: 250px;
+      display: none;
+      z-index: 1000;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      margin-bottom: 10px;
+      transition: all 0.3s ease;
+      overflow-y: auto;
+      word-wrap: break-word;
+      transform-origin: left center;  /* 添加变换原点 */
+    }
+    #chat-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 400px;  /* 增加宽度 */
+      height: 300px;
+      background: rgba(0,0,0,0.7);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+    #chat-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 440px;  /* 调整位置以匹配新的聊天框宽度 */
+      width: 40px;
+      height: 40px;
+      background: rgba(0,0,0,0.7);
+      border: none;
+      border-radius: 50%;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      z-index: 1001;
+      transition: all 0.3s ease;
+    }
+    #chat-toggle:hover {
+      background: rgba(0,0,0,0.9);
+      transform: scale(1.1);
+    }
+    #chat-toggle.hidden {
+      right: 20px;
+    }
+    #chat-messages {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 15px;
+      color: white;
+      font-family: Arial, sans-serif;
+      scrollbar-width: thin;
+      scrollbar-color: #222 transparent;  /* 滑块颜色更淡，轨道透明 */
+    }
+    #chat-messages::-webkit-scrollbar {
+      width: 4px;  /* 减小滚动条宽度 */
+    }
+    #chat-messages::-webkit-scrollbar-track {
+      background: transparent;  /* 轨道透明 */
+    }
+    #chat-messages::-webkit-scrollbar-thumb {
+      background: #222;  /* 滑块颜色更淡 */
+      border-radius: 2px;
+    }
+    #chat-messages::-webkit-scrollbar-thumb:hover {
+      background: #333;  /* 悬停时稍微明显一点 */
+    }
+    #chat-input-container {
+      padding: 15px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      gap: 10px;
+    }
+    #chat-input {
+      flex-grow: 1;
+      padding: 8px;
+      border: none;
+      border-radius: 5px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+    #send-button {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      background: #128fff;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    #send-button:hover {
+      background: #0f7ae6;
+    }
+    .message {
+      margin-bottom: 10px;
+      padding: 8px;
+      border-radius: 5px;
+    }
+    .user-message {
+      background: rgba(255,255,255,0.1);
+      margin-left: 20%;
+      display: inline-block;  /* 让背景宽度跟随文字 */
+      max-width: 80%;  /* 最大宽度限制 */
+      float: right;  /* 添加右对齐 */
+      clear: both;  /* 清除浮动 */
+    }
+    .ai-message {
+      background: rgba(18,143,255,0.2);
+      margin-right: 20%;
+      float: left;  /* 添加左对齐 */
+      clear: both;  /* 清除浮动 */
+    }
+    #dialog::before {
+      content: '';
+      position: absolute;
+      top: 17px;
+      left: -9px;
+      width: 0;
+      height: 0;
+      border-bottom: 10px solid transparent;
+      border-top: 10px solid transparent;
+      border-right: 10px solid rgba(0,0,0,0.7);
+      transform: rotate(0deg);
+      z-index: 1001;  /* 确保三角形在对话框之上 */
+    }
+    #loading-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      transition: opacity 0.3s ease;
+    }
+    #loading-container.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #128fff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    #loading-text {
+      color: white;
+      font-family: Arial, sans-serif;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    #progress-bar {
+      width: 200px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    #progress {
+      width: 0%;
+      height: 100%;
+      background: #128fff;
+      transition: width 0.1s linear;
+    }
+  </style>
 </head>
-
 <body>
-this is my webset...
-</body>
+  <div id="loading-container">
+    <div class="loading-spinner"></div>
+    <div id="loading-text">加载中...</div>
+    <div id="progress-bar">
+      <div id="progress"></div>
+    </div>
+  </div>
+  <div id="dialog">
+    Hello，我是简历AI助手，您可以将岗位描述告诉我，我将检测我的岗位匹配度！
+  </div>
+  <div id="chat-container">
+    <div id="chat-messages"></div>
+    <div id="chat-input-container">
+      <input type="text" id="chat-input" placeholder="输入消息...">
+      <button id="send-button">发送</button>
+    </div>
+  </div>
+  <button id="chat-toggle">×</button>
 
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+
+    // 创建场景、相机和渲染器
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ 
+      antialias: true,
+      alpha: true,
+      preserveDrawingBuffer: true,
+      logarithmicDepthBuffer: true,
+      powerPreference: "high-performance"  // 优先使用高性能GPU
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));  // 限制像素比
+    renderer.setSize(300, 300);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.5;
+    document.body.appendChild(renderer.domElement);
+
+    // 创建对话框元素
+    const dialog = document.getElementById('dialog');
+    
+    // 使用节流函数优化对话框位置更新
+    function throttle(func, limit) {
+      let inThrottle;
+      return function() {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+          func.apply(context, args);
+          inThrottle = true;
+          setTimeout(() => inThrottle = false, limit);
+        }
+      }
+    }
+    
+    // 更新对话框位置
+    const updateDialogPosition = throttle(function() {
+      const modelPosition = new THREE.Vector3(0, 1, 0);
+      modelPosition.project(camera);
+      
+      const canvasRect = renderer.domElement.getBoundingClientRect();
+      
+      const x = (modelPosition.x * 0.5 + 0.5) * 300;
+      const y = (-modelPosition.y * 0.5 + 0.5) * 300;
+      
+      dialog.style.left = `${canvasRect.left + x + 80}px`;
+      dialog.style.top = `${canvasRect.top + y - 50}px`;
+      
+      const distance = camera.position.distanceTo(modelPosition);
+      dialog.style.display = distance < 15 ? 'block' : 'none';
+    }, 100);  // 每100ms最多执行一次
+
+    // 优化光源设置
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    directionalLight.position.set(5, 5, 5);
+    directionalLight.castShadow = true;
+    directionalLight.shadow.mapSize.width = 2048;  // 减小阴影贴图大小
+    directionalLight.shadow.mapSize.height = 2048;
+    directionalLight.shadow.camera.near = 0.1;
+    directionalLight.shadow.camera.far = 100;
+    directionalLight.shadow.bias = -0.001;
+    scene.add(directionalLight);
+
+    // 优化控制器设置
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.screenSpacePanning = false;
+    controls.minDistance = 2;
+    controls.maxDistance = 10;
+    controls.maxPolarAngle = Math.PI / 2;
+    controls.rotateSpeed = 0.5;  // 降低旋转速度
+    controls.enableZoom = true;
+    controls.enablePan = false;
+
+    // 优化渲染循环
+    let lastTime = 0;
+    const targetFPS = 60;
+    const frameInterval = 1000 / targetFPS;
+
+    function animate(currentTime) {
+      requestAnimationFrame(animate);
+
+      const deltaTime = currentTime - lastTime;
+      if (deltaTime >= frameInterval) {
+        // 更新控制器
+        controls.update();
+
+        // 更新动画混合器
+        if (mixer) {
+          const delta = Math.min(deltaTime / 1000, 0.1);  // 限制最大delta时间
+          mixer.update(delta);
+        }
+
+        // 更新对话框位置
+        updateDialogPosition();
+
+        renderer.render(scene, camera);
+        lastTime = currentTime;
+      }
+    }
+
+    // 优化窗口大小调整事件
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        camera.aspect = renderer.domElement.width / renderer.domElement.height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(renderer.domElement.width, renderer.domElement.height);
+      }, 100);  // 延迟100ms执行
+    });
+
+    // 优化聊天消息滚动
+    function scrollToBottom() {
+      const chatMessages = document.getElementById('chat-messages');
+      if (chatMessages) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    }
+
+    // 使用防抖函数优化滚动
+    const debouncedScroll = debounce(scrollToBottom, 100);
+
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    // 优化消息添加函数
+    function addMessage(message, sender) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${sender}-message`;
+      messageDiv.textContent = message;
+      chatMessages.appendChild(messageDiv);
+      debouncedScroll();
+    }
+
+    // 优化流式响应处理
+    async function processStreamResponse(reader, messageDiv, dialogBox) {
+      const decoder = new TextDecoder();
+      let aiResponse = '';
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') break;
+            
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.choices[0].delta.content) {
+                const content = parsed.choices[0].delta.content;
+                aiResponse += content;
+                messageDiv.textContent = aiResponse;
+                dialogBox.textContent = aiResponse;
+                debouncedScroll();
+              }
+            } catch (e) {
+              console.error('解析响应数据出错:', e);
+            }
+          }
+        }
+      }
+    }
+
+    // 设置相机位置
+    camera.position.set(0, 0.5, 8);  // 将相机高度从2调整到3，使其稍微向上仰视
+
+    // 加载 FBX 模型
+    const loader = new FBXLoader();
+    let mixer; // 用于动画混合
+    let actions = []; // 存储所有动画动作
+    let currentAction = null; // 当前播放的动画
+
+    // 获取加载相关元素
+    const loadingContainer = document.getElementById('loading-container');
+    const loadingText = document.getElementById('loading-text');
+    const progressBar = document.getElementById('progress');
+
+    loader.load(
+      'model.fbx',
+      function (object) {
+        // 加载完成后隐藏加载界面
+        setTimeout(() => {
+          loadingContainer.classList.add('hidden');
+        }, 500);
+
+        // 调整模型大小和位置
+        object.scale.set(0.07, 0.07, 0.07);  // 调整模型大小
+        object.position.set(-1, -3.5, 0);  // 调整Y轴位置，使模型居中
+        object.rotation.y = -Math.PI/2;  // 保持模型朝向
+        
+        // 遍历模型的所有材质，调整材质属性
+        object.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+            
+            // 如果材质存在，调整材质属性
+            if (child.material) {
+              // 创建新的标准材质
+              const newMaterial = new THREE.MeshStandardMaterial({
+                map: child.material.map,  // 保留原始纹理
+                color: child.material.color,  // 保留原始颜色
+                metalness: 0.1,  // 非常低的金属度
+                roughness: 0.7,  // 适中的粗糙度
+                envMapIntensity: 0.3,  // 较低的环境贴图强度
+                side: THREE.DoubleSide,
+                transparent: child.material.transparent,
+                opacity: child.material.opacity
+              });
+
+              // 复制原始材质的贴图
+              if (child.material.normalMap) newMaterial.normalMap = child.material.normalMap;
+              if (child.material.aoMap) newMaterial.aoMap = child.material.aoMap;
+              if (child.material.roughnessMap) newMaterial.roughnessMap = child.material.roughnessMap;
+
+              // 应用新材质
+              child.material = newMaterial;
+              child.material.needsUpdate = true;
+            }
+
+            // 优化几何体
+            if (child.geometry) {
+              child.geometry.computeVertexNormals();  // 重新计算法线
+              child.geometry.computeBoundingSphere();  // 重新计算包围球
+            }
+          }
+        });
+        
+        scene.add(object);
+
+        // 如果模型包含动画，设置动画混合器
+        if (object.animations && object.animations.length > 0) {
+          console.log('找到动画数量:', object.animations.length);
+          object.animations.forEach((clip, index) => {
+            console.log(`动画 ${index + 1}:`, clip.name);
+          });
+
+          // 更新加载进度到90%
+          progressBar.style.width = '90%';
+          loadingText.textContent = '正在加载动画...';
+
+          mixer = new THREE.AnimationMixer(object);
+          
+          // 创建所有动画动作
+          object.animations.forEach((clip) => {
+            const action = mixer.clipAction(clip);
+            actions.push(action);
+          });
+
+          // 默认播放第一个动画
+          if (actions.length > 0) {
+            currentAction = actions[0];
+            currentAction.play();
+            console.log('开始播放第一个动画');
+            
+            // 完成加载，进度条到100%
+            setTimeout(() => {
+              progressBar.style.width = '100%';
+              loadingText.textContent = '加载完成！';
+              setTimeout(() => {
+                loadingContainer.classList.add('hidden');
+              }, 500);
+            }, 500);
+          }
+        } else {
+          console.log('警告：模型中没有找到动画数据');
+          // 如果没有动画，直接完成加载
+          progressBar.style.width = '100%';
+          loadingText.textContent = '加载完成！';
+          setTimeout(() => {
+            loadingContainer.classList.add('hidden');
+          }, 500);
+        }
+      },
+      function (xhr) {
+        const percent = (xhr.loaded / xhr.total * 100) * 0.9; // 模型加载占90%的进度
+        // 使用requestAnimationFrame确保进度条更新更平滑
+        requestAnimationFrame(() => {
+          progressBar.style.width = `${percent}%`;
+          loadingText.textContent = `加载中... ${Math.round(percent)}%`;
+        });
+      },
+      function (error) {
+        console.error('加载模型时出错:', error);
+        loadingText.textContent = '加载失败，请刷新页面重试';
+        loadingText.style.color = '#ff4444';
+      }
+    );
+
+    animate();
+
+    // 添加聊天功能
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const sendButton = document.getElementById('send-button');
+    const dialogBox = document.getElementById('dialog');  // 重命名变量避免冲突
+
+    // 替换为你的OpenAI API密钥
+    const OPENAI_API_KEY = 'sk-81e07dcd42a2468892da1e5b9d0ed43b';
+    const API_URL = 'https://api.deepseek.com/chat/completions';
+
+    // 添加打字机效果
+    async function typeWriter(element, text, speed = 50) {
+      element.textContent = '';
+      for (let i = 0; i < text.length; i++) {
+        element.textContent += text[i];
+        await new Promise(resolve => setTimeout(resolve, speed));
+      }
+    }
+
+    async function sendMessage(message) {
+      try {
+        // 显示用户消息
+        addMessage(message, 'user');
+        
+        // 创建AI回复消息元素
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message ai-message';
+        chatMessages.appendChild(messageDiv);
+        
+        // 显示对话框
+        dialogBox.style.display = 'block';
+
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OPENAI_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: 'deepseek-chat',
+            messages: [
+              {
+                role: 'system',
+                content: '你是一个友好的3D虚拟助手，请用简短友好的语气回答。不超过100个字'
+              },
+              {
+                role: 'user',
+                content: message
+              }
+            ],
+            stream: true,
+            max_tokens: 200
+          })
+        });
+        
+        // 处理流式响应
+        const reader = response.body.getReader();
+        await processStreamResponse(reader, messageDiv, dialogBox);
+      } catch (error) {
+        console.error('Error:', error);
+        const errorMessage = '抱歉，我现在无法回答。';
+        messageDiv.textContent = errorMessage;  // 使用已创建的messageDiv
+        dialogBox.style.display = 'block';
+        dialogBox.textContent = errorMessage;
+      }
+    }
+
+    function handleSend() {
+      const message = chatInput.value.trim();
+      if (message) {
+        sendMessage(message);
+        chatInput.value = '';
+      }
+    }
+
+    sendButton.addEventListener('click', handleSend);
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        handleSend();
+      }
+    });
+
+    // 添加聊天框显示/隐藏功能
+    const chatToggle = document.getElementById('chat-toggle');
+    const chatContainer = document.getElementById('chat-container');
+    let isChatVisible = true;
+
+    chatToggle.addEventListener('click', () => {
+      isChatVisible = !isChatVisible;
+      chatContainer.style.transform = isChatVisible ? 'translateX(0)' : 'translateX(420px)';  // 调整位移距离
+      chatToggle.classList.toggle('hidden');
+      chatToggle.textContent = isChatVisible ? '×' : '⬅';
+    });
+
+    // 初始化欢迎消息
+    addMessage('Hello，我是简历AI助手，您可以将岗位描述告诉我，我将检测我的岗位匹配度！', 'ai');
+  </script>
+</body>
 </html>
