@@ -16,7 +16,8 @@
     body {
       margin: 0;
       overflow: hidden;
-      background-color: #333333;  /* 添加背景色 */
+      background-color: #1a1a1a;  /* 更深的背景色 */
+      color: #ffffff;  /* 默认文字颜色为白色 */
     }
     canvas {
       display: block;
@@ -26,7 +27,7 @@
       width: 300px !important;
       height: 300px !important;
       border-radius: 10px;
-      /* box-shadow: 0 0 10px rgba(0,0,0,0.2); */
+      z-index: 10;  /* 确保3D模型在简历内容之上 */
     }
     #info {
       position: absolute;
@@ -54,13 +55,19 @@
       transition: all 0.3s ease;
       overflow-y: auto;
       word-wrap: break-word;
-      transform-origin: left center;  /* 添加变换原点 */
+      transform-origin: left center;
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    #dialog.visible {
+      opacity: 1;
+      transform: scale(1);
     }
     #chat-container {
       position: fixed;
       bottom: 20px;
       right: 20px;
-      width: 400px;  /* 增加宽度 */
+      width: 450px;
       height: 300px;
       background: rgba(0,0,0,0.7);
       border-radius: 10px;
@@ -68,14 +75,15 @@
       flex-direction: column;
       z-index: 1000;
       transition: all 0.3s ease;
+      transform: translateX(0);  /* 初始状态 */
     }
-    #chat-toggle {
-      position: fixed;
-      bottom: 20px;
-      right: 440px;  /* 调整位置以匹配新的聊天框宽度 */
-      width: 40px;
-      height: 40px;
-      background: rgba(0,0,0,0.7);
+    #chat-hide {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 30px;
+      height: 30px;
+      background: transparent;
       border: none;
       border-radius: 50%;
       color: white;
@@ -87,12 +95,30 @@
       z-index: 1001;
       transition: all 0.3s ease;
     }
-    #chat-toggle:hover {
-      background: rgba(0,0,0,0.9);
+    #chat-hide:hover {
+      background: rgba(255,255,255,0.1);
       transform: scale(1.1);
     }
-    #chat-toggle.hidden {
+    #chat-show {
+      position: fixed;
+      bottom: 20px;
       right: 20px;
+      background: rgba(0,0,0,0.7);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: none;  /* 初始隐藏 */
+      align-items: center;
+      justify-content: center;
+      color: white;
+      cursor: pointer;
+      z-index: 1001;
+      transition: all 0.3s ease;
+      border: none;
+    }
+    #chat-show:hover {
+      background: rgba(0,0,0,0.9);
+      transform: scale(1.1);
     }
     #chat-messages {
       flex-grow: 1;
@@ -103,17 +129,17 @@
       scrollbar-width: thin;
       scrollbar-color: #222 transparent;  /* 滑块颜色更淡，轨道透明 */
     }
-    #chat-messages::-webkit-scrollbar {
+    ::-webkit-scrollbar {
       width: 4px;  /* 减小滚动条宽度 */
     }
-    #chat-messages::-webkit-scrollbar-track {
+    ::-webkit-scrollbar-track {
       background: transparent;  /* 轨道透明 */
     }
-    #chat-messages::-webkit-scrollbar-thumb {
+    ::-webkit-scrollbar-thumb {
       background: #222;  /* 滑块颜色更淡 */
       border-radius: 2px;
     }
-    #chat-messages::-webkit-scrollbar-thumb:hover {
+    ::-webkit-scrollbar-thumb:hover {
       background: #333;  /* 悬停时稍微明显一点 */
     }
     #chat-input-container {
@@ -224,6 +250,189 @@
       background: #128fff;
       transition: width 0.1s linear;
     }
+    #resume-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #1a1a1a;
+      padding: 40px;
+      overflow-y: auto;
+      z-index: 1;
+      display: flex;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+    .resume-content-wrapper {
+      max-width: calc(100% - 600px);  /* 相应调整最大宽度 */
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    .resume-section {
+      margin-bottom: 40px;
+      opacity: 1;
+      transform: none;
+    }
+    .resume-section h2 {
+      color: #ffffff;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #3498db;
+      font-size: 1.8em;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+    }
+    .resume-section h2::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 24px;
+      background: #3498db;
+      margin-right: 10px;
+      border-radius: 2px;
+    }
+    .resume-content {
+      color: #ffffff;
+      line-height: 1.8;
+    }
+    .resume-content h3 {
+      color: #ffffff;
+      margin: 20px 0 15px;
+      font-size: 1.4em;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .resume-content h3 .time {
+      font-size: 0.85em;
+      color: #b0b0b0;
+      font-weight: normal;
+    }
+    .resume-content p {
+      margin: 10px 0;
+      color: #ffffff;
+    }
+    .resume-content ul {
+      list-style: none;
+      padding-left: 20px;
+    }
+    .resume-content li {
+      margin-bottom: 12px;
+      position: relative;
+      color: #ffffff;
+      line-height: 1.6;
+    }
+    .resume-content li:before {
+      content: "•";
+      color: #3498db;
+      position: absolute;
+      left: -20px;
+      font-size: 1.2em;
+    }
+    .experience-item, .project-item {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 25px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .experience-item:hover, .project-item:hover {
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+      border-color: #3498db;
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .experience-item h3, .project-item h3 {
+      margin-top: 0;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .experience-item .position {
+      color: #3498db;
+      font-size: 1.1em;
+      margin: 5px 0;
+    }
+    .experience-item .achievement {
+      color: #b0b0b0;
+      font-style: italic;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    }
+    .project-item .tech-stack {
+      color: #b0b0b0;
+      font-size: 0.9em;
+      margin: 5px 0;
+    }
+    .project-item .project-desc {
+      color: #ffffff;
+      margin: 10px 0;
+      line-height: 1.6;
+    }
+    .project-item .results {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    }
+    .project-item .results p {
+      color: #ffffff;
+      font-weight: 500;
+      margin-bottom: 10px;
+    }
+    #chat-container {
+      z-index: 1000;  /* 确保聊天框在最上层 */
+    }
+    #loading-container {
+      z-index: 2000;  /* 确保加载界面在最上层 */
+    }
+    /* 新增头部样式 */
+    .resume-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 40px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.2);
+    }
+    .resume-photo {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 20px;
+      border: 3px solid #3498db;
+    }
+    .resume-personal-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .resume-personal-info h1 {
+      margin: 0;
+      font-size: 2.5em;
+      color: #ffffff;
+    }
+    .resume-personal-info p {
+      margin: 5px 0;
+      color: #b0b0b0;
+    }
+    /* 添加公司logo样式 */
+    .company-logo {
+      width: 40px;
+      height: 40px;
+      margin-right: 10px;
+      object-fit: contain;
+    }
+    .experience-item h3 {
+      display: flex;
+      align-items: center;
+    }
   </style>
 </head>
 <body>
@@ -234,17 +443,180 @@
       <div id="progress"></div>
     </div>
   </div>
-  <div id="dialog">
-    Hello，我是简历AI助手，您可以将岗位描述告诉我，我将检测我的岗位匹配度！
-  </div>
+  <div id="dialog"></div>
   <div id="chat-container">
+    <button id="chat-hide">×</button>
     <div id="chat-messages"></div>
     <div id="chat-input-container">
       <input type="text" id="chat-input" placeholder="输入消息...">
       <button id="send-button">发送</button>
     </div>
   </div>
-  <button id="chat-toggle">×</button>
+  <button id="chat-show">⬅</button>
+  <div id="resume-container">
+    <div class="resume-content-wrapper">
+      <!-- 新增头部 -->
+      <div class="resume-header">
+        <img class="resume-photo" src="avator.jpg" alt="个人照片">
+        <div class="resume-personal-info">
+          <h1>贾仕通</h1>
+          <p>6年前端经验 | 13727056861 | 741700076@qq.com | 深圳</p>
+        </div>
+      </div>
+      <!-- 原有的个人优势部分 -->
+      <div class="resume-section">
+        <h2>个人优势</h2>
+        <div class="resume-content">
+          <ul>
+            <li>6年前端开发经验,精通Html,CSS,JavaScript,TypeScript</li>
+            <li>熟练使用VueJs/React主流MVVM框架及ElementUI/Ant Design UI框架开发项目,深入了解其原理</li>
+            <li>熟悉前端工程化,擅长使用Webpack/Vite项目构建,具备构建高效、可维护前端架构的能力</li>
+            <li>具备AI领域开发经验,擅长利用AI技术通过精准Prompt辅助开发及解决问题</li>
+          </ul>
+        </div>
+      </div>
+      <!-- 补全工作经历部分 -->
+      <div class="resume-section">
+        <h2>工作经历</h2>
+        <div class="resume-content">
+          <div class="experience-item">
+            <h3>
+              <img src="https://www.anker.com/favicon.ico" alt="Anker Logo" class="company-logo">
+              安克创新科技股份有限公司
+              <span class="time">2022.07 - 至今</span>
+            </h3>
+            <div class="position">高级前端开发工程师</div>
+            <p>负责AnkerWork & AnkerDockManager等核心产品的开发与维护，提升用户体验和系统性能。</p>
+            <ul>
+              <li>优化应用启动时间，从8秒降至3秒，提升用户体验</li>
+              <li>重构代码架构，提升代码复用率60%，开发效率提升40%</li>
+              <li>引入自动化测试，测试覆盖率提升至85%，bug修复周期缩短50%</li>
+              <li>优化性能，FPS提升至60，内存占用降低30%</li>
+            </ul>
+            <div class="achievement">用户满意度从3.9提升至4.7，应用稳定性提升40%</div>
+          </div>
+          <div class="experience-item">
+            <h3>
+              <img src="https://www.anker.com/favicon.ico" alt="Anker Logo" class="company-logo">
+              安克创新科技股份有限公司
+              <span class="time">2021.07 - 2022.06</span>
+            </h3>
+            <div class="position">前端开发工程师</div>
+            <p>负责Anker应用组件市场的开发与维护，提升开发效率和用户体验。</p>
+            <ul>
+              <li>开发组件市场，提升组件复用率70%，开发周期缩短40%</li>
+              <li>优化搜索功能，准确率提升至95%，月活用户突破500</li>
+              <li>实现组件在线预览，提升用户体验，下载量突破10000</li>
+              <li>优化性能，页面加载时间降低50%，用户体验提升60%</li>
+            </ul>
+            <div class="achievement">用户满意度达4.8，组件复用率提升70%</div>
+          </div>
+          <div class="experience-item">
+            <h3>摩比可可网络科技有限公司 2020.8-2022.8</h3>
+            <p>前端工程师</p>
+            <ul>
+              <li>负责项目核心模块的开发与维护工作，项目重构及可复用模块的编写</li>
+              <li>负责部分前端工程化,如技术选型,eslint规范,git规范,前端性能优化等</li>
+              <li>成绩: 活动2021年最具价值工程师奖，多次获得优秀研发人员奖</li>
+            </ul>
+          </div>
+          <div class="experience-item">
+            <h3>深圳市有家生活家居有限公司 2019.8-2020.8</h3>
+            <p>前端工程师</p>
+            <ul>
+              <li>独立开发公司小程序,app,以及部分web项目,与后台配合接口调试,实现数据交互与展示</li>
+              <li>负责项目的版本选代更新,修复BUG,兼容问题,优化代码结构和页面性能,保证执行效率,提高用户体验度</li>
+              <li>成绩: 优化小程序用户体验,提升大量用户日活</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <!-- 新增项目经历部分 -->
+      <div class="resume-section">
+        <h2>项目经历</h2>
+        <div class="resume-content">
+          <div class="project-item">
+            <h3>AnkerWork & AnkerDockManager·前端主责<span class="time">2023.02-至今</span></h3>
+            <p class="tech-stack">技术栈：Electron + Vue3 + TypeScript + Pinia + Element-plus</p>
+            <p class="project-desc">项目概述：公司会议机、耳机、摄像头、拓展坞等设备的桌面端管理工具，功能包括设备OTA，数据展示及设备设置</p>
+            <ul>
+              <li>主导项目整体架构设计与框架搭建，编写公共类与组件，并将基础模块封装为node module</li>
+              <li>引入addon封装C++模块通过inversify依赖注入到业务层供JS调用，CPU占用率降低40%</li>
+              <li>通过asar，webpack代码压缩，Tree shaking等技术，优化安装包体积40%</li>
+              <li>负责项目分支管理,CI/CD自动化构建及代码扫描规则配置</li>
+            </ul>
+            <div class="results">
+              <p>项目成果：</p>
+              <ul>
+                <li>从Qt完整迁移至Electron,为公司节省每年数万元的License费用</li>
+                <li>用户评分星级从3.9提升至4.7，用户满意度显著提高</li>
+                <li>应用启动时间从8秒优化至3秒，提升用户体验</li>
+                <li>代码复用率提升60%，开发效率提升40%</li>
+              </ul>
+            </div>
+          </div>
+          <div class="project-item">
+            <h3>Anker应用组件市场·全栈工程师 2023.10-2023.12</h3>
+            <p>项目概述: 公司内源建设平台，所有日常开发需要使用的组件，模块，方法都可以在平台内找到</p>
+            <p>技术栈: 前端: React + Ant Design 后端: Golang+Gin+Mysql56.7</p>
+            <ul>
+              <li>负责项目UI设计、前后端开发、部署工作</li>
+              <li>负责项目与飞书及coding打通，实现业务闭环</li>
+              <li>项目成果: 减少大量重复开发时间，提高公共资源利用率，显著提高开发效率；组件复用率提升70%，开发周期缩短40%；平台月活用户达500+，组件下载量突破10000次</li>
+            </ul>
+          </div>
+          <div class="project-item">
+            <h3>souncore Help&Feedback 前端负责人 2024.5-至今</h3>
+            <p>项目概述: souncore App内嵌H5，包含产品Faq, Feedback和部分运营相关功能</p>
+            <p>技术栈: React (modern.js + arco-design)</p>
+            <ul>
+              <li>承接日常需求，完成软件需求评审，软件设计方案编写</li>
+              <li>负责项目架构设计和核心功能开发</li>
+              <li>优化页面性能和用户体验</li>
+              <li>实现多语言支持和自适应布局</li>
+              <li>项目成果: 页面加载时间优化至2秒以内，提升用户体验；用户反馈处理效率提升50%；移动端适配率达99%，兼容性测试通过率100%</li>
+            </ul>
+          </div>
+          <div class="project-item">
+            <h3>蜂巢SCRM管理系统·前端工程师 2020.06-2022.06</h3>
+            <p>项目概述: 集成多个社媒渠道的用户管理平台,拥有傻瓜式起建站系统,让用户无忧建站,大幅降低人力财力及时间成本</p>
+            <p>技术栈：Vue.js+TypeScript+ElementUI grapes.js jsPlumb</p>
+            <ul>
+              <li>负责核心模块（建站系统，自动化流程）的开发和维护</li>
+              <li>建站模块基于Grapes.js，将插件二次封装</li>
+              <li>自动化流程模块基于jsplumb</li>
+              <li>项目成果: 站点模块完成后成为系统的主要卖点,相比普通版本销售额提升10倍</li>
+            </ul>
+          </div>
+          <div class="project-item">
+            <h3>蜂巢聊天小程序 前端工程师</h3>
+            <p>项目概述：为商家打造的专属聊天小程序，让商家能够随时随地触达客户</p>
+            <p>技术栈：react(taro.js框架)+taro-ui+socket.io-client</p>
+            <ul>
+              <li>独立开发整个项目，搭建框架，规范代码规则，编写可复用组件等</li>
+              <li>构建socket.io通信体系，实现兼容多渠道的实时通信</li>
+              <li>处理socket.io在小程序端的兼容性问题，以及聊天窗口的复杂布局问题</li>
+              <li>项目成果: 作为web端的附加功能卖点，在不降低系统使用率的同时，增加了销量，平均日活占所有用户的85%；消息送达率提升至99.9%，延迟降低至100ms以内</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <!-- 新增教育经历部分 -->
+      <div class="resume-section">
+        <h2>教育经历</h2>
+        <div class="resume-content">
+          <div class="experience-item">
+            <h3>珠海科技学院 计算机科学与技术·本科 20XX - 20XX</h3>
+            <ul>
+              <li>主修计算机科学与技术专业,熟练掌握计算机科学的基本理论和基本知识</li>
+              <li>毕业设计获得了优秀毕业论文</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div style="height: 100px;"></div>
+    </div>
+  </div>
 
   <script type="module">
     import * as THREE from 'three';
@@ -272,6 +644,8 @@
 
     // 创建对话框元素
     const dialog = document.getElementById('dialog');
+    let currentText = '';
+    let isDialogVisible = false;
     
     // 使用节流函数优化对话框位置更新
     function throttle(func, limit) {
@@ -300,9 +674,43 @@
       dialog.style.left = `${canvasRect.left + x + 80}px`;
       dialog.style.top = `${canvasRect.top + y - 50}px`;
       
-      const distance = camera.position.distanceTo(modelPosition);
-      dialog.style.display = distance < 15 ? 'block' : 'none';
-    }, 100);  // 每100ms最多执行一次
+      if (!isDialogVisible) {
+        dialog.style.display = 'block';
+        dialog.classList.add('visible');
+        typeWriter(dialog, 'Hello，我是简历AI助手，您可以将岗位描述告诉我，我将检测我的岗位匹配度！');
+        isDialogVisible = true;
+      }
+    }, 100);
+
+    // 添加打字机效果
+    async function typeWriter(element, text, speed = 50) {
+      element.textContent = '';
+      for (let i = 0; i < text.length; i++) {
+        element.textContent += text[i];
+        await new Promise(resolve => setTimeout(resolve, speed));
+      }
+    }
+
+    // 设置对话框初始状态
+    dialog.style.display = 'none';
+    dialog.classList.remove('visible');
+    isDialogVisible = false;
+
+    // 添加鼠标移动事件监听
+    renderer.domElement.addEventListener('mousemove', () => {
+      updateDialogPosition();
+    });
+
+    // 添加鼠标离开事件监听
+    renderer.domElement.addEventListener('mouseleave', () => {
+      if (isDialogVisible) {
+        dialog.classList.remove('visible');
+        setTimeout(() => {
+          dialog.style.display = 'none';
+          isDialogVisible = false;
+        }, 300);
+      }
+    });
 
     // 优化光源设置
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
@@ -350,7 +758,7 @@
         }
 
         // 更新对话框位置
-        updateDialogPosition();
+        // updateDialogPosition();
 
         renderer.render(scene, camera);
         lastTime = currentTime;
@@ -572,15 +980,6 @@
     const OPENAI_API_KEY = 'sk-81e07dcd42a2468892da1e5b9d0ed43b';
     const API_URL = 'https://api.deepseek.com/chat/completions';
 
-    // 添加打字机效果
-    async function typeWriter(element, text, speed = 50) {
-      element.textContent = '';
-      for (let i = 0; i < text.length; i++) {
-        element.textContent += text[i];
-        await new Promise(resolve => setTimeout(resolve, speed));
-      }
-    }
-
     async function sendMessage(message) {
       try {
         // 显示用户消息
@@ -644,20 +1043,28 @@
       }
     });
 
-    // 添加聊天框显示/隐藏功能
-    const chatToggle = document.getElementById('chat-toggle');
+    // 修改聊天框显示/隐藏功能
+    const chatHide = document.getElementById('chat-hide');
+    const chatShow = document.getElementById('chat-show');
     const chatContainer = document.getElementById('chat-container');
     let isChatVisible = true;
 
-    chatToggle.addEventListener('click', () => {
-      isChatVisible = !isChatVisible;
-      chatContainer.style.transform = isChatVisible ? 'translateX(0)' : 'translateX(420px)';  // 调整位移距离
-      chatToggle.classList.toggle('hidden');
-      chatToggle.textContent = isChatVisible ? '×' : '⬅';
+    chatHide.addEventListener('click', () => {
+      isChatVisible = false;
+      chatContainer.style.transform = 'translateX(470px)';
+      chatHide.style.display = 'none';
+      chatShow.style.display = 'flex';
+    });
+
+    chatShow.addEventListener('click', () => {
+      isChatVisible = true;
+      chatContainer.style.transform = 'translateX(0)';
+      chatShow.style.display = 'none';
+      chatHide.style.display = 'flex';
     });
 
     // 初始化欢迎消息
-    addMessage('Hello，我是简历AI助手，您可以将岗位描述告诉我，我将检测我的岗位匹配度！', 'ai');
+    addMessage('Hello，我是Evan简历AI助手，您可以将岗位描述告诉我，我将检测Evan与您的岗位匹配度哦！', 'ai');
   </script>
 </body>
 </html>
