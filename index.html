@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Load FBX Model with Animation</title>
+  <title>个人简历</title>
   <script type="importmap">
     {
       "imports": {
@@ -69,7 +69,7 @@
       right: 20px;
       width: 450px;
       height: 300px;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0,0,0,0.95);
       border-radius: 10px;
       display: flex;
       flex-direction: column;
@@ -206,7 +206,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.95);
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -257,7 +257,7 @@
       width: 100%;
       height: 100%;
       background: #1a1a1a;
-      padding: 40px;
+      padding: 20px 0;
       overflow-y: auto;
       z-index: 1;
       display: flex;
@@ -432,17 +432,116 @@
     .experience-item h3 {
       display: flex;
       align-items: center;
+      justify-content: flex-start;
+      gap: 20px;
+    }
+    /* 添加移动端适配样式 */
+    @media screen and (max-width: 768px) {
+      .resume-content-wrapper {
+        max-width: 100%;
+        padding: 0 15px;
+      }
+
+      .resume-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+      }
+
+      .resume-photo {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 15px;
+      }
+
+      .resume-personal-info h1 {
+        font-size: 2em;
+      }
+
+      .resume-personal-info p {
+        font-size: 0.9em;
+      }
+
+      canvas {
+        width: 200px !important;
+        height: 200px !important;
+        bottom: 10px;
+        left: 10px;
+      }
+
+      #chat-container {
+        width: 100%;
+        height: 100%;
+        bottom: 0;
+        right: 0;
+        border-radius: 0;
+        transform: translateX(100%);
+      }
+
+      #chat-container.show {
+        transform: translateX(0);
+      }
+
+      #chat-hide {
+        display: none;
+      }
+
+      #chat-show {
+        display: flex;
+        bottom: 10px;
+        right: 10px;
+      }
+
+      #dialog {
+        max-width: 200px;
+        font-size: 0.9em;
+      }
+
+      .experience-item, .project-item {
+        padding: 15px;
+      }
+
+      .experience-item h3, .project-item h3 {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .company-logo {
+        width: 30px;
+        height: 30px;
+      }
+
+      .time {
+        font-size: 0.8em;
+      }
+    }
+
+    /* 添加平板适配样式 */
+    @media screen and (min-width: 769px) and (max-width: 1024px) {
+      .resume-content-wrapper {
+        max-width: calc(100% - 400px);
+      }
+
+      canvas {
+        width: 250px !important;
+        height: 250px !important;
+      }
+
+      #chat-container {
+        width: 350px;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="loading-container">
+  <!-- <div id="loading-container">
     <div class="loading-spinner"></div>
     <div id="loading-text">加载中...</div>
     <div id="progress-bar">
       <div id="progress"></div>
     </div>
-  </div>
+  </div> -->
   <div id="dialog"></div>
   <div id="chat-container">
     <button id="chat-hide">×</button>
@@ -457,7 +556,7 @@
     <div class="resume-content-wrapper">
       <!-- 新增头部 -->
       <div class="resume-header">
-        <img class="resume-photo" src="avator.jpg" alt="个人照片">
+        <img class="resume-photo" src="https://cdn.jsdelivr.net/gh/sizhousama/sizhousama.github.io@master/avator.jpg" alt="个人照片">
         <div class="resume-personal-info">
           <h1>贾仕通</h1>
           <p>6年前端经验 | 13727056861 | 741700076@qq.com | 深圳</p>
@@ -471,6 +570,7 @@
             <li>6年前端开发经验,精通Html,CSS,JavaScript,TypeScript</li>
             <li>熟练使用VueJs/React主流MVVM框架及ElementUI/Ant Design UI框架开发项目,深入了解其原理</li>
             <li>熟悉前端工程化,擅长使用Webpack/Vite项目构建,具备构建高效、可维护前端架构的能力</li>
+            <li>擅长使用Electron框架开发windows/macos桌面应用,熟悉Electron原理,熟悉NodeJs,了解C++</li>
             <li>具备AI领域开发经验,擅长利用AI技术通过精准Prompt辅助开发及解决问题</li>
           </ul>
         </div>
@@ -481,53 +581,44 @@
         <div class="resume-content">
           <div class="experience-item">
             <h3>
-              <img src="https://www.anker.com/favicon.ico" alt="Anker Logo" class="company-logo">
+              <img src="https://cdn.jsdelivr.net/gh/sizhousama/sizhousama.github.io@master/anker.jpg" alt="Anker Logo" class="company-logo">
               安克创新科技股份有限公司
-              <span class="time">2022.07 - 至今</span>
+              <span class="time">2022.08 - 至今</span>
             </h3>
-            <div class="position">高级前端开发工程师</div>
-            <p>负责AnkerWork & AnkerDockManager等核心产品的开发与维护，提升用户体验和系统性能。</p>
+            <div class="position">前端开发工程师</div>
             <ul>
-              <li>优化应用启动时间，从8秒降至3秒，提升用户体验</li>
-              <li>重构代码架构，提升代码复用率60%，开发效率提升40%</li>
-              <li>引入自动化测试，测试覆盖率提升至85%，bug修复周期缩短50%</li>
-              <li>优化性能，FPS提升至60，内存占用降低30%</li>
+              <li>担任前端负责人，主导多个项目的开发与维护,包括PC客户端、Web管理平台、App内嵌H5页面等。</li>
+              <li>主导项目架构设计和搭建工作,并完成可供多个项目复用的公共模块和方法的封装</li>
+              <li>负责项目分支管理和持续集成、部署(CI/CD)流程的搭建,有效提高了整体流程的执行效率。</li>
+              <li>在部门内进行前端技术培训,降低工作沟通成本,提升团队整本技术水平和工作效率。</li>
             </ul>
-            <div class="achievement">用户满意度从3.9提升至4.7，应用稳定性提升40%</div>
+            <div class="achievement">成绩：3年两次获得A+绩效，并获得两次季度Spot Bouns员工</div>
           </div>
           <div class="experience-item">
             <h3>
-              <img src="https://www.anker.com/favicon.ico" alt="Anker Logo" class="company-logo">
-              安克创新科技股份有限公司
-              <span class="time">2021.07 - 2022.06</span>
+              <img src="https://cdn.jsdelivr.net/gh/sizhousama/sizhousama.github.io@master/mob.jpg" alt="摩比可可网络科技有限公司" class="company-logo">
+              摩比可可网络科技有限公司 
+              <span class="time">2020.8 - 2022.8</span>
             </h3>
             <div class="position">前端开发工程师</div>
-            <p>负责Anker应用组件市场的开发与维护，提升开发效率和用户体验。</p>
-            <ul>
-              <li>开发组件市场，提升组件复用率70%，开发周期缩短40%</li>
-              <li>优化搜索功能，准确率提升至95%，月活用户突破500</li>
-              <li>实现组件在线预览，提升用户体验，下载量突破10000</li>
-              <li>优化性能，页面加载时间降低50%，用户体验提升60%</li>
-            </ul>
-            <div class="achievement">用户满意度达4.8，组件复用率提升70%</div>
-          </div>
-          <div class="experience-item">
-            <h3>摩比可可网络科技有限公司 2020.8-2022.8</h3>
-            <p>前端工程师</p>
             <ul>
               <li>负责项目核心模块的开发与维护工作，项目重构及可复用模块的编写</li>
               <li>负责部分前端工程化,如技术选型,eslint规范,git规范,前端性能优化等</li>
-              <li>成绩: 活动2021年最具价值工程师奖，多次获得优秀研发人员奖</li>
             </ul>
+            <div class="achievement">成绩：2021年最具价值工程师奖，多次获得优秀研发人员奖</div>
           </div>
           <div class="experience-item">
-            <h3>深圳市有家生活家居有限公司 2019.8-2020.8</h3>
-            <p>前端工程师</p>
+            <h3>
+              <img src="https://cdn.jsdelivr.net/gh/sizhousama/sizhousama.github.io@master/yoke.jpg" alt="深圳市有家生活家居有限公司" class="company-logo">
+              深圳市有家生活家居有限公司 
+              <span class="time">2019.8 - 2020-8</span>
+            </h3>
+            <div class="position">前端开发工程师</div>
             <ul>
               <li>独立开发公司小程序,app,以及部分web项目,与后台配合接口调试,实现数据交互与展示</li>
               <li>负责项目的版本选代更新,修复BUG,兼容问题,优化代码结构和页面性能,保证执行效率,提高用户体验度</li>
-              <li>成绩: 优化小程序用户体验,提升大量用户日活</li>
             </ul>
+            <div class="achievement">成绩：优化小程序用户体验,提升大量用户日活</div>
           </div>
         </div>
       </div>
@@ -536,7 +627,7 @@
         <h2>项目经历</h2>
         <div class="resume-content">
           <div class="project-item">
-            <h3>AnkerWork & AnkerDockManager·前端主责<span class="time">2023.02-至今</span></h3>
+            <h3>AnkerWork & AnkerDockManager·前端主责<span class="time">2023.02 - 至今</span></h3>
             <p class="tech-stack">技术栈：Electron + Vue3 + TypeScript + Pinia + Element-plus</p>
             <p class="project-desc">项目概述：公司会议机、耳机、摄像头、拓展坞等设备的桌面端管理工具，功能包括设备OTA，数据展示及设备设置</p>
             <ul>
@@ -550,23 +641,28 @@
               <ul>
                 <li>从Qt完整迁移至Electron,为公司节省每年数万元的License费用</li>
                 <li>用户评分星级从3.9提升至4.7，用户满意度显著提高</li>
-                <li>应用启动时间从8秒优化至3秒，提升用户体验</li>
-                <li>代码复用率提升60%，开发效率提升40%</li>
               </ul>
             </div>
           </div>
           <div class="project-item">
-            <h3>Anker应用组件市场·全栈工程师 2023.10-2023.12</h3>
+            <h3>Anker应用组件市场·全栈工程师<span class="time">2023.10 - 2023.12</span></h3>
             <p>项目概述: 公司内源建设平台，所有日常开发需要使用的组件，模块，方法都可以在平台内找到</p>
             <p>技术栈: 前端: React + Ant Design 后端: Golang+Gin+Mysql56.7</p>
             <ul>
               <li>负责项目UI设计、前后端开发、部署工作</li>
               <li>负责项目与飞书及coding打通，实现业务闭环</li>
-              <li>项目成果: 减少大量重复开发时间，提高公共资源利用率，显著提高开发效率；组件复用率提升70%，开发周期缩短40%；平台月活用户达500+，组件下载量突破10000次</li>
             </ul>
+            <div class="results">
+              <p>项目成果：</p>
+              <ul>
+                <li>减少大量重复开发时间，提高公共资源利用率，显著提高开发效率</li>
+                <li>组件复用率提升70%，开发周期缩短40%</li>
+                <li>平台月活用户达500+，组件下载量突破10000次</li>
+              </ul>
+            </div>
           </div>
           <div class="project-item">
-            <h3>souncore Help&Feedback 前端负责人 2024.5-至今</h3>
+            <h3>souncore Help&Feedback 前端负责人<span class="time">2024.5 - 至今</span></h3>
             <p>项目概述: souncore App内嵌H5，包含产品Faq, Feedback和部分运营相关功能</p>
             <p>技术栈: React (modern.js + arco-design)</p>
             <ul>
@@ -574,30 +670,47 @@
               <li>负责项目架构设计和核心功能开发</li>
               <li>优化页面性能和用户体验</li>
               <li>实现多语言支持和自适应布局</li>
-              <li>项目成果: 页面加载时间优化至2秒以内，提升用户体验；用户反馈处理效率提升50%；移动端适配率达99%，兼容性测试通过率100%</li>
             </ul>
+            <div class="results">
+              <p>项目成果：</p>
+              <ul>
+                <li>页面加载时间优化至2秒以内，提升用户体验</li>
+                <li>用户反馈处理效率提升50%</li>
+                <li>移动端适配率达99%，兼容性测试通过率100%</li>
+              </ul>
+            </div>
           </div>
           <div class="project-item">
-            <h3>蜂巢SCRM管理系统·前端工程师 2020.06-2022.06</h3>
+            <h3>蜂巢SCRM管理系统·前端工程师<span class="time">2020.06 - 2022.06</span></h3>
             <p>项目概述: 集成多个社媒渠道的用户管理平台,拥有傻瓜式起建站系统,让用户无忧建站,大幅降低人力财力及时间成本</p>
             <p>技术栈：Vue.js+TypeScript+ElementUI grapes.js jsPlumb</p>
             <ul>
               <li>负责核心模块（建站系统，自动化流程）的开发和维护</li>
-              <li>建站模块基于Grapes.js，将插件二次封装</li>
-              <li>自动化流程模块基于jsplumb</li>
-              <li>项目成果: 站点模块完成后成为系统的主要卖点,相比普通版本销售额提升10倍</li>
+              <li>建站模块基于Grapes.js，将插件二次封装，实现零代码可视化拖拽建站</li>
+              <li>自动化流程模块基于jsplumb，将流程图绘制为可视化流程图</li>
             </ul>
+            <div class="results">
+              <p>项目成果：</p>
+              <ul>
+                <li>站点模块完成后成为系统的主要卖点,相比普通版本销售额提升10倍</li>
+              </ul>
+            </div>
           </div>
           <div class="project-item">
-            <h3>蜂巢聊天小程序 前端工程师</h3>
+            <h3>蜂巢聊天小程序 前端工程师<span class="time">2021.08 - 2021.12</span></h3>
             <p>项目概述：为商家打造的专属聊天小程序，让商家能够随时随地触达客户</p>
             <p>技术栈：react(taro.js框架)+taro-ui+socket.io-client</p>
             <ul>
               <li>独立开发整个项目，搭建框架，规范代码规则，编写可复用组件等</li>
               <li>构建socket.io通信体系，实现兼容多渠道的实时通信</li>
               <li>处理socket.io在小程序端的兼容性问题，以及聊天窗口的复杂布局问题</li>
-              <li>项目成果: 作为web端的附加功能卖点，在不降低系统使用率的同时，增加了销量，平均日活占所有用户的85%；消息送达率提升至99.9%，延迟降低至100ms以内</li>
             </ul>
+            <div class="results">
+              <p>项目成果：</p>
+              <ul>
+                <li>作为web端的附加功能卖点，在不降低系统使用率的同时，增加了销量，平均日活占所有用户的85%；消息送达率提升至99.9%，延迟降低至100ms以内</li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -668,11 +781,11 @@
       
       const canvasRect = renderer.domElement.getBoundingClientRect();
       
-      const x = (modelPosition.x * 0.5 + 0.5) * 300;
-      const y = (-modelPosition.y * 0.5 + 0.5) * 300;
+      const x = (modelPosition.x * 0.5 + 0.5) * (isMobile ? 200 : 300);
+      const y = (-modelPosition.y * 0.5 + 0.5) * (isMobile ? 200 : 300);
       
-      dialog.style.left = `${canvasRect.left + x + 80}px`;
-      dialog.style.top = `${canvasRect.top + y - 50}px`;
+      dialog.style.left = `${canvasRect.left + x + (isMobile ? 40 : 80)}px`;
+      dialog.style.top = `${canvasRect.top + y - (isMobile ? 30 : 50)}px`;
       
       if (!isDialogVisible) {
         dialog.style.display = 'block';
@@ -856,117 +969,117 @@
     const loadingText = document.getElementById('loading-text');
     const progressBar = document.getElementById('progress');
 
-    loader.load(
-      'model.fbx',
-      function (object) {
-        // 加载完成后隐藏加载界面
-        setTimeout(() => {
-          loadingContainer.classList.add('hidden');
-        }, 500);
+    // loader.load(
+    //   'https://cdn.jsdelivr.net/gh/sizhousama/sizhousama.github.io@master/model.fbx',
+    //   function (object) {
+    //     // 加载完成后隐藏加载界面
+    //     setTimeout(() => {
+    //       loadingContainer.classList.add('hidden');
+    //     }, 500);
 
-        // 调整模型大小和位置
-        object.scale.set(0.07, 0.07, 0.07);  // 调整模型大小
-        object.position.set(-1, -3.5, 0);  // 调整Y轴位置，使模型居中
-        object.rotation.y = -Math.PI/2;  // 保持模型朝向
+    //     // 调整模型大小和位置
+    //     object.scale.set(0.07, 0.07, 0.07);  // 调整模型大小
+    //     object.position.set(-1, -3.5, 0);  // 调整Y轴位置，使模型居中
+    //     object.rotation.y = -Math.PI/2;  // 保持模型朝向
         
-        // 遍历模型的所有材质，调整材质属性
-        object.traverse((child) => {
-          if (child.isMesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
+    //     // 遍历模型的所有材质，调整材质属性
+    //     object.traverse((child) => {
+    //       if (child.isMesh) {
+    //         child.castShadow = true;
+    //         child.receiveShadow = true;
             
-            // 如果材质存在，调整材质属性
-            if (child.material) {
-              // 创建新的标准材质
-              const newMaterial = new THREE.MeshStandardMaterial({
-                map: child.material.map,  // 保留原始纹理
-                color: child.material.color,  // 保留原始颜色
-                metalness: 0.1,  // 非常低的金属度
-                roughness: 0.7,  // 适中的粗糙度
-                envMapIntensity: 0.3,  // 较低的环境贴图强度
-                side: THREE.DoubleSide,
-                transparent: child.material.transparent,
-                opacity: child.material.opacity
-              });
+    //         // 如果材质存在，调整材质属性
+    //         if (child.material) {
+    //           // 创建新的标准材质
+    //           const newMaterial = new THREE.MeshStandardMaterial({
+    //             map: child.material.map,  // 保留原始纹理
+    //             color: child.material.color,  // 保留原始颜色
+    //             metalness: 0.1,  // 非常低的金属度
+    //             roughness: 0.7,  // 适中的粗糙度
+    //             envMapIntensity: 0.3,  // 较低的环境贴图强度
+    //             side: THREE.DoubleSide,
+    //             transparent: child.material.transparent,
+    //             opacity: child.material.opacity
+    //           });
 
-              // 复制原始材质的贴图
-              if (child.material.normalMap) newMaterial.normalMap = child.material.normalMap;
-              if (child.material.aoMap) newMaterial.aoMap = child.material.aoMap;
-              if (child.material.roughnessMap) newMaterial.roughnessMap = child.material.roughnessMap;
+    //           // 复制原始材质的贴图
+    //           if (child.material.normalMap) newMaterial.normalMap = child.material.normalMap;
+    //           if (child.material.aoMap) newMaterial.aoMap = child.material.aoMap;
+    //           if (child.material.roughnessMap) newMaterial.roughnessMap = child.material.roughnessMap;
 
-              // 应用新材质
-              child.material = newMaterial;
-              child.material.needsUpdate = true;
-            }
+    //           // 应用新材质
+    //           child.material = newMaterial;
+    //           child.material.needsUpdate = true;
+    //         }
 
-            // 优化几何体
-            if (child.geometry) {
-              child.geometry.computeVertexNormals();  // 重新计算法线
-              child.geometry.computeBoundingSphere();  // 重新计算包围球
-            }
-          }
-        });
+    //         // 优化几何体
+    //         if (child.geometry) {
+    //           child.geometry.computeVertexNormals();  // 重新计算法线
+    //           child.geometry.computeBoundingSphere();  // 重新计算包围球
+    //         }
+    //       }
+    //     });
         
-        scene.add(object);
+    //     scene.add(object);
 
-        // 如果模型包含动画，设置动画混合器
-        if (object.animations && object.animations.length > 0) {
-          console.log('找到动画数量:', object.animations.length);
-          object.animations.forEach((clip, index) => {
-            console.log(`动画 ${index + 1}:`, clip.name);
-          });
+    //     // 如果模型包含动画，设置动画混合器
+    //     if (object.animations && object.animations.length > 0) {
+    //       console.log('找到动画数量:', object.animations.length);
+    //       object.animations.forEach((clip, index) => {
+    //         console.log(`动画 ${index + 1}:`, clip.name);
+    //       });
 
-          // 更新加载进度到90%
-          progressBar.style.width = '90%';
-          loadingText.textContent = '正在加载动画...';
+    //       // 更新加载进度到90%
+    //       progressBar.style.width = '90%';
+    //       loadingText.textContent = '正在加载动画...';
 
-          mixer = new THREE.AnimationMixer(object);
+    //       mixer = new THREE.AnimationMixer(object);
           
-          // 创建所有动画动作
-          object.animations.forEach((clip) => {
-            const action = mixer.clipAction(clip);
-            actions.push(action);
-          });
+    //       // 创建所有动画动作
+    //       object.animations.forEach((clip) => {
+    //         const action = mixer.clipAction(clip);
+    //         actions.push(action);
+    //       });
 
-          // 默认播放第一个动画
-          if (actions.length > 0) {
-            currentAction = actions[0];
-            currentAction.play();
-            console.log('开始播放第一个动画');
+    //       // 默认播放第一个动画
+    //       if (actions.length > 0) {
+    //         currentAction = actions[0];
+    //         currentAction.play();
+    //         console.log('开始播放第一个动画');
             
-            // 完成加载，进度条到100%
-            setTimeout(() => {
-              progressBar.style.width = '100%';
-              loadingText.textContent = '加载完成！';
-              setTimeout(() => {
-                loadingContainer.classList.add('hidden');
-              }, 500);
-            }, 500);
-          }
-        } else {
-          console.log('警告：模型中没有找到动画数据');
-          // 如果没有动画，直接完成加载
-          progressBar.style.width = '100%';
-          loadingText.textContent = '加载完成！';
-          setTimeout(() => {
-            loadingContainer.classList.add('hidden');
-          }, 500);
-        }
-      },
-      function (xhr) {
-        const percent = (xhr.loaded / xhr.total * 100) * 0.9; // 模型加载占90%的进度
-        // 使用requestAnimationFrame确保进度条更新更平滑
-        requestAnimationFrame(() => {
-          progressBar.style.width = `${percent}%`;
-          loadingText.textContent = `加载中... ${Math.round(percent)}%`;
-        });
-      },
-      function (error) {
-        console.error('加载模型时出错:', error);
-        loadingText.textContent = '加载失败，请刷新页面重试';
-        loadingText.style.color = '#ff4444';
-      }
-    );
+    //         // 完成加载，进度条到100%
+    //         setTimeout(() => {
+    //           progressBar.style.width = '100%';
+    //           loadingText.textContent = '加载完成！';
+    //           setTimeout(() => {
+    //             loadingContainer.classList.add('hidden');
+    //           }, 500);
+    //         }, 500);
+    //       }
+    //     } else {
+    //       console.log('警告：模型中没有找到动画数据');
+    //       // 如果没有动画，直接完成加载
+    //       progressBar.style.width = '100%';
+    //       loadingText.textContent = '加载完成！';
+    //       setTimeout(() => {
+    //         loadingContainer.classList.add('hidden');
+    //       }, 500);
+    //     }
+    //   },
+    //   function (xhr) {
+    //     const percent = (xhr.loaded / xhr.total * 100) * 0.9; // 模型加载占90%的进度
+    //     // 使用requestAnimationFrame确保进度条更新更平滑
+    //     requestAnimationFrame(() => {
+    //       progressBar.style.width = `${percent}%`;
+    //       loadingText.textContent = `加载中... ${Math.round(percent)}%`;
+    //     });
+    //   },
+    //   function (error) {
+    //     console.error('加载模型时出错:', error);
+    //     loadingText.textContent = '加载失败，请刷新页面重试';
+    //     loadingText.style.color = '#ff4444';
+    //   }
+    // );
 
     animate();
 
@@ -1049,9 +1162,16 @@
     const chatContainer = document.getElementById('chat-container');
     let isChatVisible = true;
 
+    // 检查是否为移动设备
+    const isMobile = window.innerWidth <= 768;
+
     chatHide.addEventListener('click', () => {
       isChatVisible = false;
-      chatContainer.style.transform = 'translateX(470px)';
+      if (isMobile) {
+        chatContainer.style.transform = 'translateX(100%)';
+      } else {
+        chatContainer.style.transform = 'translateX(470px)';
+      }
       chatHide.style.display = 'none';
       chatShow.style.display = 'flex';
     });
@@ -1061,6 +1181,18 @@
       chatContainer.style.transform = 'translateX(0)';
       chatShow.style.display = 'none';
       chatHide.style.display = 'flex';
+    });
+
+    // 添加窗口大小改变事件监听
+    window.addEventListener('resize', () => {
+      const newIsMobile = window.innerWidth <= 768;
+      if (newIsMobile !== isMobile) {
+        if (newIsMobile && isChatVisible) {
+          chatContainer.style.transform = 'translateX(100%)';
+          chatHide.style.display = 'none';
+          chatShow.style.display = 'flex';
+        }
+      }
     });
 
     // 初始化欢迎消息
