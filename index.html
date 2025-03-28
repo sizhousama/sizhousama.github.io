@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>个人简历</title>
+  <title>Evan的个人简历</title>
   <script type="importmap">
     {
       "imports": {
@@ -12,6 +12,7 @@
       }
     }
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     body {
       margin: 0;
@@ -127,7 +128,10 @@
       color: white;
       font-family: Arial, sans-serif;
       scrollbar-width: thin;
-      scrollbar-color: #222 transparent;  /* 滑块颜色更淡，轨道透明 */
+      scrollbar-color: #222 transparent;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
     ::-webkit-scrollbar {
       width: 4px;  /* 减小滚动条宽度 */
@@ -149,17 +153,28 @@
       gap: 10px;
     }
     #chat-input {
-      flex-grow: 1;
-      padding: 8px;
-      border: none;
-      border-radius: 5px;
-      background: rgba(255,255,255,0.1);
-      color: white;
+      width: calc(100% - 80px);
+      height: 32px;
+      resize: none;
+      overflow-y: auto;
+      max-height: 200px;
+      line-height: 1.5;
+      padding: 5px;
+      border-radius: 8px;
+      transition: height 0.2s;
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+    }
+    #chat-input:focus {
+      outline: none;
+      border-color: #128fff;
     }
     #send-button {
+      width: 80px;
+      max-height: 40px;
       padding: 8px 15px;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
       background: #128fff;
       color: white;
       cursor: pointer;
@@ -169,23 +184,116 @@
       background: #0f7ae6;
     }
     .message {
-      margin-bottom: 10px;
-      padding: 8px;
-      border-radius: 5px;
+      padding: 10px 16px;
+      margin: 8px 0;
+      border-radius: 12px;
+      max-width: 80%;
+      word-wrap: break-word;
+      line-height: 1.5;
+      white-space: pre-wrap;  /* 保留换行和空格 */
+      font-size: 14px;
     }
     .user-message {
-      background: rgba(255,255,255,0.1);
-      margin-left: 20%;
-      display: inline-block;  /* 让背景宽度跟随文字 */
-      max-width: 80%;  /* 最大宽度限制 */
-      float: right;  /* 添加右对齐 */
-      clear: both;  /* 清除浮动 */
+      background: #128fff;
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+      margin-left: auto;
     }
     .ai-message {
-      background: rgba(18,143,255,0.2);
-      margin-right: 20%;
-      float: left;  /* 添加左对齐 */
-      clear: both;  /* 清除浮动 */
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+      margin-right: auto;
+    }
+    /* Markdown 样式 */
+    .ai-message p {
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .ai-message h1, .ai-message h2, .ai-message h3, .ai-message h4, .ai-message h5, .ai-message h6 {
+      color: #fff;
+      margin: 8px 0;
+      font-weight: 600;
+    }
+
+    .ai-message h1 { font-size: 1.5em; }
+    .ai-message h2 { font-size: 1.3em; }
+    .ai-message h3 { font-size: 1.2em; }
+
+    .ai-message code {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+    }
+
+    .ai-message pre {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 12px;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 8px 0;
+    }
+
+    .ai-message pre code {
+      background: none;
+      padding: 0;
+      font-size: 0.9em;
+      line-height: 1.4;
+    }
+
+    .ai-message blockquote {
+      border-left: 4px solid rgba(255, 255, 255, 0.2);
+      margin: 8px 0;
+      padding-left: 12px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .ai-message ul, .ai-message ol {
+      padding-left: 20px;
+      margin: 8px 0;
+    }
+
+    .ai-message li {
+      margin-bottom: 4px;
+      line-height: 1.5;
+    }
+
+    .ai-message a {
+      color: #128fff;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .ai-message a:hover {
+      color: #0f7ae6;
+      text-decoration: underline;
+    }
+
+    .ai-message table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 8px 0;
+    }
+
+    .ai-message th, .ai-message td {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 8px;
+      text-align: left;
+    }
+
+    .ai-message th {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .ai-message hr {
+      border: none;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin: 8px 0;
     }
     #dialog::before {
       content: '';
@@ -305,11 +413,17 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: relative;
+      a{
+        color: #ffffff;
+      }
     }
     .resume-content h3 .time {
       font-size: 0.85em;
       color: #b0b0b0;
       font-weight: normal;
+      position: absolute;
+      right: 0;
     }
     .resume-content p {
       margin: 10px 0;
@@ -353,10 +467,10 @@
       padding-bottom: 10px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
+    .project-item .position,
     .experience-item .position {
-      color: #3498db;
-      font-size: 1.1em;
-      margin: 5px 0;
+      color: #ccc;
+      font-size: 1rem;
     }
     .experience-item .achievement {
       color: #b0b0b0;
@@ -364,16 +478,6 @@
       margin-top: 10px;
       padding-top: 10px;
       border-top: 1px dashed rgba(255, 255, 255, 0.1);
-    }
-    .project-item .tech-stack {
-      color: #b0b0b0;
-      font-size: 0.9em;
-      margin: 5px 0;
-    }
-    .project-item .project-desc {
-      color: #ffffff;
-      margin: 10px 0;
-      line-height: 1.6;
     }
     .project-item .results {
       margin-top: 15px;
@@ -532,12 +636,154 @@
         width: 350px;
       }
     }
+
+    /* 添加链接样式 */
+    .github-link, .project-link {
+      color: #3498db;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .github-link:hover, .project-link:hover {
+      color: #2980b9;
+      text-decoration: underline;
+    }
+
+    /* 移动端适配 */
+    @media screen and (max-width: 768px) {
+      .resume-personal-info p {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+      }
+    }
+
+    /* 添加项目预览浮窗样式 */
+    .project-preview {
+      position: fixed;
+      width: 600px;
+      height: 400px;
+      background: rgba(0, 0, 0, 0.9);
+      border-radius: 10px;
+      z-index: 1000;
+      display: none;
+      overflow: hidden;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0;
+      transform: scale(0.95);
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      justify-content: center;
+    }
+
+    .project-preview.visible {
+      opacity: 1;
+      transform: translateY(-50%) scale(1);
+    }
+
+    .project-preview img,
+    .project-preview video {
+      /* width: 100%;
+      height: 100%; */
+      object-fit: cover;
+    }
+
+    .project-preview::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.8));
+      z-index: 1;
+    }
+
+    .project-preview .preview-title {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 20px;
+      color: white;
+      font-size: 1.3em;
+      z-index: 2;
+      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    }
+
+    /* 添加隐私提示样式 */
+    .privacy-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: white;
+      z-index: 2;
+      padding: 30px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 15px;
+      backdrop-filter: blur(5px);
+      width: 80%;
+    }
+
+    .privacy-icon {
+      font-size: 4em;
+      margin-bottom: 20px;
+      animation: pulse 2s infinite;
+    }
+
+    .privacy-text {
+      font-size: 1.5em;
+      line-height: 1.6;
+      color: #fff;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    /* 移动端适配 */
+    @media screen and (max-width: 768px) {
+      .project-preview {
+        width: 90%;
+        height: 300px;
+        right: 5%;
+      }
+
+      .privacy-message {
+        padding: 20px;
+        width: 90%;
+      }
+
+      .privacy-icon {
+        font-size: 3em;
+      }
+
+      .privacy-text {
+        font-size: 1.2em;
+      }
+    }
+
+    /* 平板适配 */
+    @media screen and (min-width: 769px) and (max-width: 1024px) {
+      .project-preview {
+        width: 500px;
+        height: 350px;
+      }
+    }
   </style>
 </head>
 <body>
   <!-- <div id="loading-container">
     <div class="loading-spinner"></div>
-    <div id="loading-text">加载中...</div>
+    <div id="loading-text">加载中，请稍候...</div>
     <div id="progress-bar">
       <div id="progress"></div>
     </div>
@@ -547,45 +793,42 @@
     <button id="chat-hide">×</button>
     <div id="chat-messages"></div>
     <div id="chat-input-container">
-      <input type="text" id="chat-input" placeholder="输入消息...">
+      <textarea id="chat-input" placeholder="输入..." rows="1"></textarea>
       <button id="send-button">发送</button>
     </div>
   </div>
   <button id="chat-show">⬅</button>
   <div id="resume-container">
     <div class="resume-content-wrapper">
-      <!-- 新增头部 -->
       <div class="resume-header">
         <img class="resume-photo" src="https://cdn.jsdelivr.net/gh/sizhousama/sizhousama.github.io@master/avator.jpg" alt="个人照片">
         <div class="resume-personal-info">
-          <h1>贾仕通</h1>
-          <p>6年前端经验 | 13727056861 | 741700076@qq.com | 深圳</p>
+          <h1>贾仕通 | Evan</h1>
+          <p>6年前端经验 | 13727056861 | 741700076@qq.com | 深圳 | <a href="https://github.com/sizhousama" target="_blank" class="github-link">GitHub</a></p>
         </div>
       </div>
-      <!-- 原有的个人优势部分 -->
       <div class="resume-section">
         <h2>个人优势</h2>
         <div class="resume-content">
           <ul>
-            <li>6年前端开发经验,精通Html,CSS,JavaScript,TypeScript</li>
-            <li>熟练使用VueJs/React主流MVVM框架及ElementUI/Ant Design UI框架开发项目,深入了解其原理</li>
-            <li>熟悉前端工程化,擅长使用Webpack/Vite项目构建,具备构建高效、可维护前端架构的能力</li>
-            <li>擅长使用Electron框架开发windows/macos桌面应用,熟悉Electron原理,熟悉NodeJs,了解C++</li>
-            <li>具备AI领域开发经验,擅长利用AI技术通过精准Prompt辅助开发及解决问题</li>
+            <li>6年前端开发经验，精通Html、CSS、JavaScript、TypeScript</li>
+            <li>熟练使用VueJs/React主流MVVM框架及ElementUI/Ant Design UI框架开发项目，深入了解其原理</li>
+            <li>熟悉前端工程化,擅长使用Webpack/Vite项目构建，具备构建高效、可维护前端架构的能力</li>
+            <li>擅长使用Electron框架开发Windows/MacOs桌面应用，熟悉Electron原理,熟悉NodeJs,了解C++</li>
+            <li>具备AI领域开发经验,擅长利用AI技术通过精准Prompt辅助开发及解决问题，AI开源项目：<a href="https://github.com/sizhousama/diagramGPT" target="_blank" class="github-link">diagramGPT
+            </a></li>
           </ul>
         </div>
       </div>
-      <!-- 补全工作经历部分 -->
       <div class="resume-section">
         <h2>工作经历</h2>
         <div class="resume-content">
           <div class="experience-item">
             <h3>
               <img src="https://cdn.jsdelivr.net/gh/sizhousama/sizhousama.github.io@master/anker.jpg" alt="Anker Logo" class="company-logo">
-              安克创新科技股份有限公司
+              安克创新科技股份有限公司 <span class="position">前端开发工程师</span>
               <span class="time">2022.08 - 至今</span>
             </h3>
-            <div class="position">前端开发工程师</div>
             <ul>
               <li>担任前端负责人，主导多个项目的开发与维护,包括PC客户端、Web管理平台、App内嵌H5页面等。</li>
               <li>主导项目架构设计和搭建工作,并完成可供多个项目复用的公共模块和方法的封装</li>
@@ -597,10 +840,9 @@
           <div class="experience-item">
             <h3>
               <img src="https://cdn.jsdelivr.net/gh/sizhousama/sizhousama.github.io@master/mob.jpg" alt="摩比可可网络科技有限公司" class="company-logo">
-              摩比可可网络科技有限公司 
+              摩比可可网络科技有限公司 <span class="position">前端开发工程师</span>
               <span class="time">2020.8 - 2022.8</span>
             </h3>
-            <div class="position">前端开发工程师</div>
             <ul>
               <li>负责项目核心模块的开发与维护工作，项目重构及可复用模块的编写</li>
               <li>负责部分前端工程化,如技术选型,eslint规范,git规范,前端性能优化等</li>
@@ -610,10 +852,9 @@
           <div class="experience-item">
             <h3>
               <img src="https://cdn.jsdelivr.net/gh/sizhousama/sizhousama.github.io@master/yoke.jpg" alt="深圳市有家生活家居有限公司" class="company-logo">
-              深圳市有家生活家居有限公司 
+              深圳市有家生活家居有限公司 <span class="position">前端开发工程师</span>
               <span class="time">2019.8 - 2020-8</span>
             </h3>
-            <div class="position">前端开发工程师</div>
             <ul>
               <li>独立开发公司小程序,app,以及部分web项目,与后台配合接口调试,实现数据交互与展示</li>
               <li>负责项目的版本选代更新,修复BUG,兼容问题,优化代码结构和页面性能,保证执行效率,提高用户体验度</li>
@@ -622,14 +863,14 @@
           </div>
         </div>
       </div>
-      <!-- 新增项目经历部分 -->
       <div class="resume-section">
         <h2>项目经历</h2>
         <div class="resume-content">
           <div class="project-item">
-            <h3>AnkerWork & AnkerDockManager·前端主责<span class="time">2023.02 - 至今</span></h3>
-            <p class="tech-stack">技术栈：Electron + Vue3 + TypeScript + Pinia + Element-plus</p>
-            <p class="project-desc">项目概述：公司会议机、耳机、摄像头、拓展坞等设备的桌面端管理工具，功能包括设备OTA，数据展示及设备设置</p>
+            <h3>AnkerWork & AnkerDockManager · 前端主责<span class="time">2023.02 - 至今</span></a></h3>
+            <p>项目概述：公司会议机、耳机、摄像头、拓展坞等设备的桌面端管理工具，功能包括设备OTA，数据展示及设备设置</p>
+            <p>技术栈：Electron + Vue3 + TypeScript + Pinia + Element-plus</p>
+            <p>项目职责：</p>
             <ul>
               <li>主导项目整体架构设计与框架搭建，编写公共类与组件，并将基础模块封装为node module</li>
               <li>引入addon封装C++模块通过inversify依赖注入到业务层供JS调用，CPU占用率降低40%</li>
@@ -645,9 +886,10 @@
             </div>
           </div>
           <div class="project-item">
-            <h3>Anker应用组件市场·全栈工程师<span class="time">2023.10 - 2023.12</span></h3>
-            <p>项目概述: 公司内源建设平台，所有日常开发需要使用的组件，模块，方法都可以在平台内找到</p>
-            <p>技术栈: 前端: React + Ant Design 后端: Golang+Gin+Mysql56.7</p>
+            <h3>Anker应用组件市场 · 全栈工程师<span class="time">2023.10 - 2023.12</span></h3>
+            <p>项目概述：公司内源建设平台，所有日常开发需要使用的组件，模块，方法都可以在平台内找到</p>
+            <p>技术栈：前端: React + Ant Design 后端: Golang+Gin+Mysql56.7</p>
+            <p>项目职责：</p>
             <ul>
               <li>负责项目UI设计、前后端开发、部署工作</li>
               <li>负责项目与飞书及coding打通，实现业务闭环</li>
@@ -662,9 +904,10 @@
             </div>
           </div>
           <div class="project-item">
-            <h3>souncore Help&Feedback 前端负责人<span class="time">2024.5 - 至今</span></h3>
-            <p>项目概述: souncore App内嵌H5，包含产品Faq, Feedback和部分运营相关功能</p>
-            <p>技术栈: React (modern.js + arco-design)</p>
+            <h3>souncore Help&Feedback · 前端负责人<span class="time">2024.5 - 至今</span></h3>
+            <p>项目概述：souncore App内嵌H5，包含产品Faq, Feedback和部分运营相关功能</p>
+            <p>技术栈：React (modern.js + arco-design)</p>
+            <p>项目职责：</p>
             <ul>
               <li>承接日常需求，完成软件需求评审，软件设计方案编写</li>
               <li>负责项目架构设计和核心功能开发</li>
@@ -681,9 +924,10 @@
             </div>
           </div>
           <div class="project-item">
-            <h3>蜂巢SCRM管理系统·前端工程师<span class="time">2020.06 - 2022.06</span></h3>
-            <p>项目概述: 集成多个社媒渠道的用户管理平台,拥有傻瓜式起建站系统,让用户无忧建站,大幅降低人力财力及时间成本</p>
+            <h3>蜂巢SCRM管理系统 · 前端工程师<span class="time">2020.06 - 2022.06</span></h3>
+            <p>项目概述：集成多个社媒渠道的用户管理平台,拥有傻瓜式起建站系统,让用户无忧建站,大幅降低人力财力及时间成本</p>
             <p>技术栈：Vue.js+TypeScript+ElementUI grapes.js jsPlumb</p>
+            <p>项目职责：</p>
             <ul>
               <li>负责核心模块（建站系统，自动化流程）的开发和维护</li>
               <li>建站模块基于Grapes.js，将插件二次封装，实现零代码可视化拖拽建站</li>
@@ -697,9 +941,10 @@
             </div>
           </div>
           <div class="project-item">
-            <h3>蜂巢聊天小程序 前端工程师<span class="time">2021.08 - 2021.12</span></h3>
+            <h3>蜂巢聊天小程序 · 前端工程师<span class="time">2021.08 - 2021.12</span></h3>
             <p>项目概述：为商家打造的专属聊天小程序，让商家能够随时随地触达客户</p>
             <p>技术栈：react(taro.js框架)+taro-ui+socket.io-client</p>
+            <p>项目职责：</p>
             <ul>
               <li>独立开发整个项目，搭建框架，规范代码规则，编写可复用组件等</li>
               <li>构建socket.io通信体系，实现兼容多渠道的实时通信</li>
@@ -710,16 +955,16 @@
               <ul>
                 <li>作为web端的附加功能卖点，在不降低系统使用率的同时，增加了销量，平均日活占所有用户的85%；消息送达率提升至99.9%，延迟降低至100ms以内</li>
               </ul>
-            </div>
-          </div>
+            </div> 
         </div>
       </div>
-      <!-- 新增教育经历部分 -->
       <div class="resume-section">
         <h2>教育经历</h2>
         <div class="resume-content">
           <div class="experience-item">
-            <h3>珠海科技学院 计算机科学与技术·本科 20XX - 20XX</h3>
+            <h3>珠海科技学院 计算机科学与技术·本科 
+              <span class="time">2015 - 2019</span>
+            </h3>
             <ul>
               <li>主修计算机科学与技术专业,熟练掌握计算机科学的基本理论和基本知识</li>
               <li>毕业设计获得了优秀毕业论文</li>
@@ -731,10 +976,119 @@
     </div>
   </div>
 
+  <div class="project-preview"></div>
+
   <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+
+    const resumeContent = `
+候选人信息如下：
+6年前端经验 | 13727056861 | 741700076@qq.com | 深圳
+
+个人优势
+1.6年前端开发经验,精通Html,CSS,JavaScript,TypeScript
+2.熟练使用VueJs/React主流MVVM框架及ElementUI/Ant Design UI框架开发项目,深入了解其原理。
+3.熟悉前端工程化,擅长使用Webpack/Vite项目构建,具备构建高效、可维护前端架构的能力,成功提升多个项目的开发效率。
+4.擅长使用Electron框架开发Windows/MacOs桌面应用，熟悉Electron原理,熟悉NodeJs,了解C++
+5.具备AI领域开发经验,擅长利用AI技术通过精准Prompt辅助开发及解决问题,极大提升开发效率,有效缩短项目交付周期。
+
+工作经历
+安克创新科技股份有限公司（Anker）2022.8-至今
+前端工程师
+职责和贡献:
+1.担任前端负责人，主导多个项目的开发与维护,包括PC客户端、Web管理平台、App内嵌H5页面等。
+2.主导项目架构设计和搭建工作,并完成可供多个项目复用的公共模块和方法的封装
+3.负责项目分支管理和持续集成、部署(CI/CD)流程的搭建,有效提高了整体流程的执行效率。
+4.在部门内进行前端技术培训,降低工作沟通成本,提升团队整本技术水平和工作效率。
+成绩：
+3年两次获得A+绩效，并获得两次季度Spot Bouns员工
+
+摩比可可网络科技有限公司 2020.8-2022.8
+前端工程师
+职责与贡献:
+1.负责项目核心模块的开发与维护工作，项目重构及可复用模块的编写
+2.负责部分前端工程化,如技术选型,eslint规范,git规范,前端性能优化等
+成绩:
+活动2021年最具价值工程师奖，多次获得优秀研发人员奖
+
+深圳市有家生活家居有限公司 2019.8-2020-8
+前端工程师
+职责与贡献:
+1.独立开发公司小程序,app,以及部分web项目,与后台配合接口调试,实现数据交互与展示
+2.负责项目的版本选代更新,修复BUG,兼容问题,优化代码结构和页面性能,保证执行效率,提高用户体验度
+成绩:
+优化小程序用户体验,提升大量用户日活
+
+项目经历
+AnkerWork & AnkerDockManager·前端主责
+2023.02-至今
+项目概述: 公司会议机、耳机、摄像头、拓展坞等设备的桌面端管理工具，功能包括设备OTA，数据展示及设备设置
+技术栈:项目使用Electron框架作为载体,实现跨平台应用,由Vue3+TypeScript+Pinia+Element-plus构建整个项目的整体框架，node-addon-api集成底层C++模块
+项目职责:
+1.主导项目整体架构设计与框架搭建，编写公共类与组件，并将基础模块封装为node module，支持多项目复用
+2.引入addon封装C++模块通过inversify依赖注入到业务层供JS调用，通过AsyncWorker避免主线程阻塞，CPU占用率降低40%
+3.通过asar，webpack代码压缩，Tree shaking，electron-updater等技术，优化安装包体积40%
+4.负责项目分支管理,Cl/CD自动化构建及代码扫描规则配置，优化开发流程，提升效率
+项目成果:
+1.AnkerWork经过项目架构优化,短期内从Qt完整迁移至Electron,为公司节省每年数万元的License费用
+2.将用户评分星级从3.9提升至4.7，用户满意度显著提高
+
+Anker应用组件市场·全栈工程师
+2023.10-2023.12
+项目概述:公司内源建设平台，所有日常开发需要使用的组件，模块，方法都可以在平台内找到
+技术栈:前端:React + Ant Design后端:Golang+Gin+Mysql56.7
+项目职责:
+1.负责项目UI设计、前后端开发、部署工作
+2.负责项目与飞书及coding打通，实现业务闭环
+项目成果:
+1.减少大量重复开发时间，提高公共资源利用率，显著提高开发效率
+2.组件复用率提升70%，开发周期缩短40%
+3.平台月活用户达500+，组件下载量突破10000次
+
+souncore Help&Feedback 前端负责人
+2024.5-至今
+项目概述: souncore App内嵌H5，包含产品Faq, Feedback和部分运营相关功能
+技术栈: React (modern.js + arco-design)
+项目职责:
+1.承接日常需求，完成软件需求评审，软件设计方案编写
+2.负责项目架构设计和核心功能开发
+3.优化页面性能和用户体验
+4.实现多语言支持和自适应布局
+项目成果:
+1.页面加载时间优化至2秒以内，提升用户体验
+2.用户反馈处理效率提升50%
+3.移动端适配率达99%，兼容性测试通过率100%
+
+蜂巢SCRM管理系统·前端工程师
+2020.06-2022.06
+项目概述:集成多个社媒渠道的用户管理平台,拥有傻瓜式起建站系统,让用户无忧建站,大幅降低人力财力及时间成本
+技术栈：Vue.js+TypeScript+ElementUI grapes.js jsPlumb
+项目职责:
+1.负责核心模块（建站系统，自动化流程）的开发和维护
+2.建站模块基于Grapes.js，将插件二次封装，实现零代码可视化拖拽建站
+3.自动化流程模块基于jsplumb，将流程图绘制为可视化流程图
+项目成果:
+站点模块完成后成为系统的主要卖点,相比普通版本销售额提升10倍
+
+蜂巢聊天小程序 前端工程师
+项目概述：为商家打造的专属聊天小程序，让商家能够随时随地触达客户
+技术栈：react(taro.js框架)+taro-ui+socket.io-client
+项目职责：
+1.独立开发整个项目，搭建框架，规范代码规则，编写可复用组件等
+2.构建socket.io通信体系，实现兼容多渠道的实时通信
+3.处理socket.io在小程序端的兼容性问题，以及聊天窗口的复杂布局问题
+项目成果：
+1.作为web端的附加功能卖点，在不降低系统使用率的同时，增加了销量，平均日活占所有用户的85%
+
+
+教育经历
+珠海科技学院
+计算机科学与技术·本科
+1.主修计算机科学与技术专业,熟练掌握计算机科学的基本理论和基本知识
+2.毕业设计获得了优秀毕业论文
+`
 
     // 创建场景、相机和渲染器
     const scene = new THREE.Scene();
@@ -759,6 +1113,8 @@
     const dialog = document.getElementById('dialog');
     let currentText = '';
     let isDialogVisible = false;
+    let typeWriterTimeout = null;
+    let isTyping = false;
     
     // 使用节流函数优化对话框位置更新
     function throttle(func, limit) {
@@ -775,7 +1131,7 @@
     }
     
     // 更新对话框位置
-    const updateDialogPosition = throttle(function() {
+    const updateDialogPosition = throttle(function(msg) {
       const modelPosition = new THREE.Vector3(0, 1, 0);
       modelPosition.project(camera);
       
@@ -790,18 +1146,36 @@
       if (!isDialogVisible) {
         dialog.style.display = 'block';
         dialog.classList.add('visible');
-        typeWriter(dialog, 'Hello，我是简历AI助手，您可以将岗位描述告诉我，我将检测我的岗位匹配度！');
+        startTypeWriter(msg || 'Hello，我是简历AI助手，您可以将岗位描述告诉我，我将检测我的岗位匹配度！');
         isDialogVisible = true;
       }
     }, 100);
 
     // 添加打字机效果
-    async function typeWriter(element, text, speed = 50) {
-      element.textContent = '';
-      for (let i = 0; i < text.length; i++) {
-        element.textContent += text[i];
-        await new Promise(resolve => setTimeout(resolve, speed));
+    function startTypeWriter(text) {
+      // 清除之前的打字效果
+      if (typeWriterTimeout) {
+        clearTimeout(typeWriterTimeout);
       }
+      if (isTyping) {
+        return;
+      }
+      
+      isTyping = true;
+      dialog.textContent = '';
+      let currentIndex = 0;
+      
+      function typeNextChar() {
+        if (currentIndex < text.length) {
+          dialog.textContent += text[currentIndex];
+          currentIndex++;
+          typeWriterTimeout = setTimeout(typeNextChar, 50);
+        } else {
+          isTyping = false;
+        }
+      }
+      
+      typeNextChar();
     }
 
     // 设置对话框初始状态
@@ -817,6 +1191,12 @@
     // 添加鼠标离开事件监听
     renderer.domElement.addEventListener('mouseleave', () => {
       if (isDialogVisible) {
+        // 清除打字效果
+        if (typeWriterTimeout) {
+          clearTimeout(typeWriterTimeout);
+        }
+        isTyping = false;
+        
         dialog.classList.remove('visible');
         setTimeout(() => {
           dialog.style.display = 'none';
@@ -916,7 +1296,16 @@
     function addMessage(message, sender) {
       const messageDiv = document.createElement('div');
       messageDiv.className = `message ${sender}-message`;
-      messageDiv.textContent = message;
+      
+      // 处理消息内容
+      if (sender === 'ai') {
+        // 使用marked解析Markdown
+        messageDiv.innerHTML = marked.parse(message);
+      } else {
+        // 用户消息保持纯文本
+        messageDiv.textContent = message;
+      }
+      
       chatMessages.appendChild(messageDiv);
       debouncedScroll();
     }
@@ -943,8 +1332,11 @@
               if (parsed.choices[0].delta.content) {
                 const content = parsed.choices[0].delta.content;
                 aiResponse += content;
-                messageDiv.textContent = aiResponse;
-                dialogBox.textContent = aiResponse;
+                
+                // 使用marked解析Markdown
+                const formattedContent = marked.parse(aiResponse);
+                messageDiv.innerHTML = formattedContent;
+                // dialogBox.innerHTML = formattedContent;
                 debouncedScroll();
               }
             } catch (e) {
@@ -1097,10 +1489,18 @@
       try {
         // 显示用户消息
         addMessage(message, 'user');
+
+        const systemPrompt = 
+        `你是一个专业的招聘分析师，请根据候选人的简历信息，严格按以下要求分析：
+        1. 匹配度打分（0-100整数）放在首行，标题格式：匹配度：xx%
+        2. 从技术栈、项目经验、工作年限三个维度分析，每点以🌟开头
+        3. 最后总结优势匹配项，如果匹配度高于80%，加上"Evan非常符合您的岗位要求，赶快联系他面试把！😎"
+        4. 语言简洁，用简历中的具体数据举例，总数不超过500字
+        5. 回复内容要紧凑，避免不必要的空行`;
         
         // 创建AI回复消息元素
         const messageDiv = document.createElement('div');
-        messageDiv.className = 'message ai-message';
+        messageDiv.className = `message ai-message`
         chatMessages.appendChild(messageDiv);
         
         // 显示对话框
@@ -1117,15 +1517,14 @@
             messages: [
               {
                 role: 'system',
-                content: '你是一个友好的3D虚拟助手，请用简短友好的语气回答。不超过100个字'
+                content: systemPrompt + resumeContent
               },
               {
                 role: 'user',
-                content: message
+                content: `请分析当前候选人与以下岗位要求的匹配度：${message}`
               }
             ],
             stream: true,
-            max_tokens: 200
           })
         });
         
@@ -1146,15 +1545,29 @@
       if (message) {
         sendMessage(message);
         chatInput.value = '';
+        adjustInputHeight(null, 32)
       }
     }
 
     sendButton.addEventListener('click', handleSend);
     chatInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
         handleSend();
       }
     });
+
+    // 自动调整输入框高度
+    function adjustInputHeight(e, height) {
+      chatInput.style.height = 'auto';
+      chatInput.style.height = `${Math.min(height || chatInput.scrollHeight, 200)}px`;
+    }
+
+    // 监听输入变化
+    chatInput.addEventListener('input', adjustInputHeight);
+
+    // 初始化高度
+    // adjustInputHeight(null, 32);
 
     // 修改聊天框显示/隐藏功能
     const chatHide = document.getElementById('chat-hide');
@@ -1196,7 +1609,92 @@
     });
 
     // 初始化欢迎消息
-    addMessage('Hello，我是Evan简历AI助手，您可以将岗位描述告诉我，我将检测Evan与您的岗位匹配度哦！', 'ai');
+    addMessage('Hello，我是简历AI助手，您可以将岗位要求告诉我，我将检测Evan与您的岗位匹配度哦！', 'ai');
+
+    // 添加项目预览功能
+    const projectItems = document.querySelectorAll('.project-item');
+    const preview = document.querySelector('.project-preview');
+    let previewTimeout;
+
+    // 项目预览数据
+    const projectPreviews = {
+      'AnkerWork & AnkerDockManager': {
+        type: 'video',
+        url: 'https://cdn.jsdelivr.net/gh/sizhousama/sizhousama.github.io@master/ankerwork.mp4',
+        title: 'AnkerWork & AnkerDockManager - 设备管理工具',
+        style: 'width:100%'
+      },
+      'Anker应用组件市场': {
+        type: 'privacy',
+        title: 'Anker应用组件市场 - 内源建设平台'
+      },
+      'souncore Help&Feedback': {
+        type: 'video',
+        url: 'https://cdn.jsdelivr.net/gh/sizhousama/sizhousama.github.io@master/soundcore.mp4',
+        title: 'souncore Help&Feedback - 产品帮助与反馈',
+        style: 'height:100%'
+      },
+      '蜂巢SCRM管理系统': {
+        type: 'privacy',
+        title: '蜂巢SCRM管理系统 - 用户管理平台'
+      },
+      '蜂巢聊天小程序': {
+        type: 'privacy',
+        title: '蜂巢聊天小程序 - 商家客户沟通工具'
+      }
+    };
+
+    // 显示预览
+    function showPreview(projectTitle) {
+      const previewData = projectPreviews[projectTitle];
+      if (!previewData) return;
+
+      clearTimeout(previewTimeout);
+      
+      if (previewData.type === 'privacy') {
+        preview.innerHTML = `
+          <div class="privacy-message">
+            <div class="privacy-icon">🔒</div>
+            <div class="privacy-text">当前项目涉及隐私，请查看其他项目哦</div>
+          </div>
+          <div class="preview-title">${previewData.title}</div>
+        `;
+      } else {
+        preview.innerHTML = `
+          ${previewData.type === 'image' 
+            ? `<img src="${previewData.url}" alt="${previewData.title}">`
+            : `<video src="${previewData.url}" autoplay loop muted style="${previewData.style}"></video>`
+          }
+          <div class="preview-title">${previewData.title}</div>
+        `;
+      }
+
+      preview.style.display = 'flex';
+      requestAnimationFrame(() => {
+        preview.classList.add('visible');
+      });
+    }
+
+    // 隐藏预览
+    function hidePreview() {
+      preview.classList.remove('visible');
+      previewTimeout = setTimeout(() => {
+        preview.style.display = 'none';
+      }, 300);
+    }
+
+    // 添加事件监听
+    projectItems.forEach(item => {
+      const title = item.querySelector('h3').textContent.split('·')[0].trim();
+      
+      item.addEventListener('mouseenter', () => {
+        showPreview(title);
+      });
+
+      item.addEventListener('mouseleave', hidePreview);
+    });
+
+
   </script>
 </body>
 </html>
